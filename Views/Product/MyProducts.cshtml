@@ -1,0 +1,82 @@
+@model IEnumerable<TradeSphere3.Models.Product>
+@{
+    ViewData["Title"] = "My Products";
+    var count = Model?.Count() ?? 0;
+}
+
+<div class="container page-container py-4">
+    <div class="page-header">
+        <div>
+            <h2 class="section-title mb-1">My Products</h2>
+            <div class="page-subtitle">Manage the products in your catalog (@count)</div>
+        </div>
+        <div class="back-actions">
+            <a asp-action="Create" class="btn btn-primary">
+                <i class="fas fa-plus me-1"></i> Add New Product
+            </a>
+        </div>
+    </div>
+
+    @if (count == 0)
+    {
+        <div class="empty-state">
+            <div class="empty-state-icon"><i class="fas fa-box-open"></i></div>
+            <div class="empty-state-title">No products yet</div>
+            <div class="empty-state-text">Start by adding your first product to showcase it to customers.</div>
+            <a asp-action="Create" class="btn btn-primary mt-2"><i class="fas fa-plus me-1"></i>Add Product</a>
+        </div>
+    }
+    else
+    {
+        <div class="dashboard-grid">
+            @foreach (var p in Model)
+            {
+                <div class="dashboard-card card-primary">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <h5 class="mb-1">@p.Name</h5>
+                        <span class="badge bg-secondary">@p.Status</span>
+                    </div>
+                    <div class="text-muted mb-2">@p.Category</div>
+                    <div class="d-flex flex-wrap gap-3 mb-3">
+                        <div><strong>Price:</strong> $@p.Price.ToString("N2")</div>
+                        @*<div><strong>Qty:</strong> @p.Quantity @p.Unit</div>*@
+
+
+
+                        @if (p.Quantity > 0)
+                        {
+                        <div><strong>Qty:</strong> @p.Quantity @p.Unit</div>
+                        }
+                        else
+                        {
+                        <div>
+                            <form asp-action="RefillProduct" asp-controller="Product" method="post" class="d-flex gap-2">
+                                <input type="hidden" name="ProductId" value="@p.ProductId" />
+                                <input type="number" name="Quantity" class="form-control form-control-sm" placeholder="Enter qty" min="1" required />
+                                <button type="submit" class="btn btn-sm btn-success">Refill</button>
+                            </form>
+                        </div>
+                        }
+                    </div>
+
+
+
+
+                    <div class="action-buttons">
+                        <a asp-action="Edit" asp-route-id="@p.ProductId" class="btn btn-sm btn-info"><i class="fas fa-edit me-1"></i>Edit</a>
+                        <a asp-controller="Feedback" asp-action="ProductFeedback" asp-route-productId="@p.ProductId" class="btn btn-primary">
+                            <i class="fas fa-comments"></i> View Feedback
+                        </a>
+                        <a asp-action="Details"
+                           asp-route-id="@p.ProductId"
+                           asp-route-callingMethods="MyProducts"
+                           class="btn btn-sm btn-primary">
+                            <i class="fas fa-eye me-1"></i>View
+                        </a>
+                        <a asp-action="Delete" asp-route-id="@p.ProductId" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash me-1"></i>Delete</a>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

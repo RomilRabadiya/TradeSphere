@@ -1,0 +1,73 @@
+﻿@model IEnumerable<TradeSphere3.Models.Order>
+    @{
+    var trader = ViewBag.Trader as TradeSphere3.Models.Trader;
+    ViewData["Title"] = $"Transactions for {trader?.Name}";
+    }
+
+<div class="container page-container py-4">
+    <div class="page-header">
+        <div>
+            <h2 class="section-title mb-1">📜 Transactions for @trader?.Name</h2>
+            <div class="page-subtitle">Review recent orders and sort by date or total amount</div>
+        </div>
+        <div class="back-actions">
+            <a asp-action="Details" asp-route-id="@trader.TraderId" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Profile
+            </a>
+        </div>
+    </div>
+
+    <!-- 🔽 Sort/Filter Bar -->
+    <form method="get" class="filters-bar mb-3">
+        <input type="hidden" name="id" value="@trader.TraderId" />
+        <div class="d-flex gap-2 align-items-center">
+            <label class="me-2 mb-0 text-muted">Sort:</label>
+            <select name="sortOrder" class="form-select w-auto" onchange="this.form.submit()">
+                <option value="">Default (Newest)</option>
+                <option value="date_desc" selected="@(ViewBag.CurrentSort=="date_desc")">Date (Newest First)</option>
+                <option value="date_asc" selected="@(ViewBag.CurrentSort=="date_asc")">Date (Oldest First)</option>
+                <option value="price_desc" selected="@(ViewBag.CurrentSort=="price_desc")">Price (High → Low)</option>
+                <option value="price_asc" selected="@(ViewBag.CurrentSort=="price_asc")">Price (Low → High)</option>
+            </select>
+        </div>
+    </form>
+
+    @if (!Model.Any())
+    {
+        <div class="empty-state">
+            <div class="empty-state-icon"><i class="fas fa-receipt"></i></div>
+            <div class="empty-state-title">No transactions available</div>
+            <div class="empty-state-text">Transactions will appear here once orders are placed.</div>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped shadow-sm">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Product</th>
+                        <th>Buyer</th>
+                        <th>Amount</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var order in Model)
+                    {
+                        <tr>
+                            <td>@order.OrderId</td>
+                            <td>@order.Product?.Name</td>
+                            <td>@order.User?.Email</td>
+                            <td>$@order.TotalAmount.ToString("N2")</td>
+                            <td>@order.OrderDate.ToString("MMM dd, yyyy")</td>
+                            <td>@order.Status</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

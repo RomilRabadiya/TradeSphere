@@ -1,0 +1,131 @@
+@model ProductDetailsViewModel
+
+@{
+    ViewData["Title"] = "Product Details";
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h2 class="mb-0">Product Details</h2>
+                    <span class="badge @(Model.Product.Status == "Active" ? "bg-success" : "bg-secondary") fs-6">
+                        @Model.Product.Status
+                    </span>
+                </div>
+                <div class="card-body">
+                    <h3 class="text-primary">@Model.Product.Name</h3>
+                    <p class="text-muted mb-3">@(Model.Product.Description ?? "No description provided")</p>
+
+                    <dl class="row">
+                        <dt class="col-sm-4">Category:</dt>
+                        <dd class="col-sm-8">
+                            <span class="badge bg-info">@(Model.Product.Category ?? "Uncategorized")</span>
+                        </dd>
+                        <dt class="col-sm-4">Price:</dt>
+                        <dd class="col-sm-8"><strong class="text-success">$@Model.Product.Price</strong> / @Model.Product.Unit</dd>
+                        <dt class="col-sm-4">Available Quantity:</dt>
+                        <dd class="col-sm-8">
+                            <strong>@Model.Product.Quantity</strong> @Model.Product.Unit
+                            @if (Model.Product.Quantity == 0)
+                            {
+                                <span class="badge bg-danger ms-2">Out of Stock</span>
+                            }
+                            else if (Model.Product.Quantity < 10)
+                            {
+                                <span class="badge bg-warning ms-2">Low Stock</span>
+                            }
+                        </dd>
+                        <dt class="col-sm-4">Trader:</dt>
+                        <dd class="col-sm-8">
+                            @if (Model.Product.Trader != null)
+                            {
+                                <strong>@Model.Product.Trader.Name</strong>
+                            }
+                            else
+                            {
+                                <span class="text-muted">Trader information not available</span>
+                            }
+                        </dd>
+                    </dl>
+
+                    @* Feedback Section *@
+                    @if (Model.Feedbacks != null && Model.Feedbacks.Any())
+                    {
+                        <hr />
+                        <h4>Customer Reviews</h4>
+                        <div class="row">
+                            @foreach (var feedback in Model.Feedbacks.OrderByDescending(f => f.ReviewDate))
+                            {
+                                <div class="col-md-6 mb-3">
+                                    <div class="card border-light">
+                                        <div class="card-body">
+                                            <strong>@(feedback.User?.UserName ?? "Anonymous")</strong>
+                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                <div>
+                                                    @for (int i = 1; i <= 5; i++)
+                                                    {
+                                                        if (i <= feedback.Rating)
+                                                        {
+                                                            <i class="fas fa-star text-warning"></i>
+                                                        }
+                                                        else
+                                                        {
+                                                            <i class="far fa-star text-warning"></i>
+                                                        }
+                                                    }
+                                                </div>
+                                            <small class="text-muted">@feedback.ReviewDate.ToString("MMM dd, yyyy")</small>
+                                        </div>
+                                            <p class="card-text">@(feedback.Comment ?? "No comment provided")</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted mt-3">No feedbacks yet for this product.</p>
+                    }
+
+                    <hr />
+
+                    @if(@ViewBag.callingMethods=="MyProducts")
+                    {
+                        <a href="@Url.Action("MyProducts", "Product")" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Back to Products
+                        </a>
+                    }
+                    else
+                    {
+                        <a href="@Url.Action("Index", "Product")" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Back to Products
+                        </a>
+                    }
+
+                    @if (User.IsInRole("User") && Model.Product.Status == "Active" && Model.Product.Quantity > 0)
+                    {
+                        <a href="@Url.Action("Create", "Order", new { productId = Model.Product.ProductId })" 
+                           class="btn btn-success ms-2">
+                            <i class="fas fa-shopping-cart"></i> Order Now
+                        </a>
+                    }
+
+                    @if (User.IsInRole("Trader"))
+                    {
+                        <a href="@Url.Action("Edit", "Product", new { id = Model.Product.ProductId })" 
+                           class="btn btn-primary ms-2">
+                            <i class="fas fa-edit"></i> Edit
+                        </a>
+                        <a href="@Url.Action("Delete", "Product", new { id = Model.Product.ProductId })" 
+                           class="btn btn-danger ms-2">
+                            <i class="fas fa-trash"></i> Delete
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

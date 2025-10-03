@@ -1,0 +1,116 @@
+@model TradeSphere3.DTOs.TraderDto
+@{
+    ViewData["Title"] = "Apply as Trader";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="mb-0">Apply to Become a Trader</h2>
+                </div>
+                <div class="card-body">
+                    <form method="post" asp-action="Apply">
+                        <div asp-validation-summary="All" class="alert alert-danger" role="alert"></div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Name" class="form-label"></label>
+                                <input asp-for="Name" class="form-control" placeholder="Enter company/business name" />
+                                <span asp-validation-for="Name" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Email" class="form-label"></label>
+                                <input asp-for="Email" class="form-control" placeholder="Enter business email" />
+                                <span asp-validation-for="Email" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Phone" class="form-label"></label>
+                                <input asp-for="Phone" class="form-control" placeholder="Enter phone number" />
+                                <span asp-validation-for="Phone" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="TradeRole" class="form-label"></label>
+                                <select asp-for="TradeRole" class="form-select">
+                                    <option value="">-- Select Trade Role --</option>
+                                    <option value="Importer">Importer</option>
+                                    <option value="Exporter">Exporter</option>
+                                    <option value="Both">Both</option>
+                                </select>
+                                <span asp-validation-for="TradeRole" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label asp-for="CIN" class="form-label"></label>
+                                <input asp-for="CIN" class="form-control" placeholder="Corporate Identity Number" />
+                                <span asp-validation-for="CIN" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label asp-for="GSTNo" class="form-label"></label>
+                                <input asp-for="GSTNo" class="form-control" placeholder="GST Registration Number" />
+                                <span asp-validation-for="GSTNo" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label asp-for="ISO" class="form-label"></label>
+                                <input asp-for="ISO" class="form-control" placeholder="ISO Certificate Number" />
+                                <span asp-validation-for="ISO" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label asp-for="Country" class="form-label"></label>
+                                <input asp-for="Country" class="form-control" placeholder="Enter country" />
+                                <span asp-validation-for="Country" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label asp-for="State" class="form-label"></label>
+                                <input asp-for="State" class="form-control" placeholder="Enter state or region" />
+                                <span asp-validation-for="State" class="text-danger"></span>
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label asp-for="City" class="form-label"></label>
+                                <input asp-for="City" class="form-control" placeholder="Enter city" />
+                                <span asp-validation-for="City" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Address" class="form-label"></label>
+                            <textarea asp-for="Address" class="form-control" rows="3" placeholder="Enter complete business address"></textarea>
+                            <span asp-validation-for="Address" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Turnover" class="form-label"></label>
+                            <input asp-for="Turnover" class="form-control" type="number" step="0.01" placeholder="Enter annual turnover" />
+                            <span asp-validation-for="Turnover" class="text-danger"></span>
+                        </div>
+
+                        <button type="submit" class="btn btn-success w-100">Submit Trader Application</button>
+                    </form>
+
+                    <p class="mt-3 text-center">
+                        <a asp-controller="Home" asp-action="Index" class="text-decoration-none">Back to Dashboard</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

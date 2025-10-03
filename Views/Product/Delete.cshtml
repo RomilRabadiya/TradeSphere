@@ -1,0 +1,90 @@
+@model Product
+
+@{
+    ViewData["Title"] = "Delete Product";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@ViewData["Title"] - TraadeSphere_vrund</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
+</head>
+<body>
+    <div class="container py-4">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card border-danger">
+                    <div class="card-header bg-danger text-white">
+                        <h2 class="mb-0">Delete Product</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-warning">
+                            <h4>Are you sure you want to delete this product?</h4>
+                            <p>This action cannot be undone.</p>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <dl class="row">
+                                    <dt class="col-sm-4">Product Name:</dt>
+                                    <dd class="col-sm-8">@Model.Name</dd>
+                                    
+                                    <dt class="col-sm-4">Description:</dt>
+                                    <dd class="col-sm-8">@(Model.Description ?? "No description")</dd>
+                                    
+                                    <dt class="col-sm-4">Category:</dt>
+                                    <dd class="col-sm-8">@(Model.Category ?? "Uncategorized")</dd>
+                                    
+                                    <dt class="col-sm-4">Price:</dt>
+                                    <dd class="col-sm-8">$@Model.Price / @Model.Unit</dd>
+                                </dl>
+                            </div>
+                            <div class="col-md-6">
+                                <dl class="row">
+                                    <dt class="col-sm-4">Quantity:</dt>
+                                    <dd class="col-sm-8">@Model.Quantity @Model.Unit</dd>
+                                    
+                                    <dt class="col-sm-4">Unit:</dt>
+                                    <dd class="col-sm-8">@Model.Unit</dd>
+                                    
+                                    <dt class="col-sm-4">Status:</dt>
+                                    <dd class="col-sm-8">
+                                        <span class="badge @(Model.Status == "Active" ? "bg-success" : "bg-secondary")">
+                                            @Model.Status
+                                        </span>
+                                    </dd>
+                                    
+                                    <dt class="col-sm-4">Created:</dt>
+                                    <dd class="col-sm-8">@Model.CreatedDate.ToString("MMM dd, yyyy")</dd>
+                                </dl>
+                            </div>
+                        </div>
+                        
+                        <hr />
+                        
+                        <form method="post" asp-action="Delete" asp-route-id="@Model.ProductId">
+                            @Html.AntiForgeryToken()
+                            
+                            <div class="d-flex justify-content-between">
+                                <a href="@Url.Action("MyProducts", "Product")" class="btn btn-secondary">
+                                    <i class="fas fa-arrow-left"></i> Cancel
+                                </a>
+                                <button type="submit" class="btn btn-danger">
+                                    <i class="fas fa-trash"></i> Delete Product
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+</body>
+</html>

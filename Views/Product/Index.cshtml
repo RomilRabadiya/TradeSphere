@@ -1,0 +1,137 @@
+﻿@model IEnumerable<Product>
+
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Identity
+@{
+    ViewData["Title"] = "Products";
+    var currentTraderId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+}
+
+
+<div class="container py-4">
+    <!-- Products Header -->
+    <div class="dashboard-welcome">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h2><i class="fas fa-store me-2"></i>Product Marketplace</h2>
+                <p class="lead mb-0">Discover amazing products from our trusted traders</p>
+            </div>
+        </div>
+    </div>
+        
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success">@TempData["Success"]</div>
+        }
+        
+    @if (Model.Any())
+    {
+        <div class="row">
+            @foreach (var product in Model)
+            {
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <h5 class="card-title mb-0">@product.Name</h5>
+                                <span class="badge @(product.Status == "Active" ? "bg-success" : "bg-secondary")">
+                                    <i class="fas fa-circle me-1" style="font-size: 0.5rem;"></i>@product.Status
+                                </span>
+                            </div>
+
+                            <p class="card-text text-muted mb-3">@product.Description</p>
+
+                            <div class="product-details mb-3">
+                                <div class="row g-2">
+                                    <div class="col-6">
+                                        <div class="stat-card p-2">
+                                            <span class="stat-number" style="font-size: 1.2rem; color: var(--success-color);">
+                                                $@product.Price
+                                            </span>
+                                            <span class="stat-label" style="font-size: 0.75rem;">per @product.Unit</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="stat-card p-2">
+                                            <span class="stat-number" style="font-size: 1.2rem; color: var(--info-color);">
+                                                @product.Quantity
+                                            </span>
+                                            <span class="stat-label" style="font-size: 0.75rem;">@product.Unit available</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mt-2">
+                                    <small class="text-muted">
+                                        <i class="fas fa-tag me-1"></i>@product.Category
+                                    </small>
+                                </div>
+                            </div>
+
+                            <div class="action-buttons">
+                                <a href="@Url.Action("Details", "Product", new { id = product.ProductId })"
+                                   class="btn btn-primary btn-sm">
+                                    <i class="fas fa-eye me-1"></i>Details
+                                </a>
+
+
+                                @if (product.Quantity > 0 && product.Status == "Active" && product.TraderId != ViewBag.CurrentTraderId)
+                                {
+                                    <a href="@Url.Action("Create", "Order", new { productId = product.ProductId })"
+                                       class="btn btn-success btn-sm">
+                                        <i class="fas fa-shopping-cart me-1"></i>Order Now
+                                    </a>
+                                }
+                                else if(product.TraderId == ViewBag.CurrentTraderId)
+                                {
+                                    <button class="btn btn-secondary btn-sm" disabled>
+                                        <i class="fas fa-shopping-cart me-1"></i>Your Own Product
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button class="btn btn-secondary btn-sm" disabled>
+                                        <i class="fas fa-shopping-cart me-1"></i>Product is Out of Stock
+                                    </button>
+                                }
+
+
+
+
+
+                                <a asp-controller="Feedback" asp-action="Create" asp-route-productId="@product.ProductId"
+                                   class="btn btn-outline-success btn-sm ms-2">
+                                    <i class="fas fa-comment-dots me-1"></i> Leave Feedback
+                                </a>
+
+
+
+
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="empty-state">
+            <i class="fas fa-box-open empty-state-icon"></i>
+            <h3 class="empty-state-title">No Products Available</h3>
+            <p class="empty-state-text">There are currently no products listed in our marketplace.</p>
+            @if (User.IsInRole("Trader"))
+            {
+                <a href="@Url.Action("Create", "Product")" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>Add Your First Product
+                </a>
+            }
+            else
+            {
+                <p class="text-muted">Check back later for new products!</p>
+            }
+        </div>
+    }
+</div>
+
+<script src="~/js/tradesphere.js"></script>

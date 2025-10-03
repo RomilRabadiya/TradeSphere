@@ -1,0 +1,68 @@
+@model IEnumerable<TradeSphere3.Models.Trader>
+    @{
+    ViewData["Title"] = "Trader Directory";
+    }
+
+<div class="container page-container">
+    <div class="page-header">
+        <div>
+            <h2 class="section-title mb-1">Trader Directory</h2>
+            <div class="page-subtitle">Browse and search verified traders</div>
+        </div>
+        <a asp-action="List" class="btn btn-outline-primary">Switch to Table View</a>
+    </div>
+
+    <!-- Search Form -->
+    <div class="search-card card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-4">
+                    <input type="text" name="name" value="@ViewBag.SearchName" class="form-control" placeholder="Trader Name (partial)" />
+                </div>
+                <div class="col-md-3">
+                    <input type="text" name="cin" value="@ViewBag.SearchCIN" class="form-control" placeholder="CIN (exact)" />
+                </div>
+                <div class="col-md-3">
+                    <input type="text" name="gstNo" value="@ViewBag.SearchGST" class="form-control" placeholder="GST No (exact)" />
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">Search</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Results -->
+    @if (!Model.Any())
+    {
+        <div class="empty-state">
+            <div class="empty-state-icon"><i class="fas fa-user-slash"></i></div>
+            <div class="empty-state-title">No traders found</div>
+            <div class="empty-state-text">Try adjusting your search terms or clear filters.</div>
+        </div>
+    }
+    else
+    {
+        <div class="trader-grid">
+            @foreach (var trader in Model)
+            {
+                <div class="trader-card">
+                    <i class="fas fa-store card-icon"></i>
+                    <h5 class="card-title">@trader.Name</h5>
+                    <p class="card-text">
+                        <strong>CIN:</strong> @trader.CIN<br>
+                        <strong>GST:</strong> @trader.GSTNo
+                    </p>
+                    <div class="d-flex gap-2">
+                        <a asp-action="Details" asp-route-id="@trader.TraderId" class="btn btn-outline-primary">
+                            View Profile
+                        </a>
+                        <a asp-controller="Message" asp-action="Send" asp-route-receiverId="@trader.TraderId" class="btn btn-outline-success">
+                            Message
+                        </a>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

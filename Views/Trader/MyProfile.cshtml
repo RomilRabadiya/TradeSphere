@@ -1,0 +1,55 @@
+@model TradeSphere3.DTOs.UserWithTraderDto
+
+@{
+    ViewData["Title"] = "My Trader Profile";
+}
+
+<div class="container py-4">
+    <h2 class="mb-3">👤 Trader Profile</h2>
+
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">@Model.FullName</h4>
+            <small>@Model.Email</small>
+        </div>
+        <div class="card-body">
+            <h5 class="mb-3">Business Details</h5>
+            <dl class="row">
+                <dt class="col-sm-4">Company Name</dt>
+                <dd class="col-sm-8">@Model.Trader.Name</dd>
+
+                <dt class="col-sm-4">Trade Role</dt>
+                <dd class="col-sm-8">@Model.Trader.TradeRole</dd>
+
+                <dt class="col-sm-4">Phone</dt>
+                <dd class="col-sm-8">@Model.Trader.Phone</dd>
+
+                <dt class="col-sm-4">Address</dt>
+                <dd class="col-sm-8">@Model.Trader.Address, @Model.Trader.City, @Model.Trader.State, @Model.Trader.Country</dd>
+
+                <dt class="col-sm-4">CIN</dt>
+                <dd class="col-sm-8">@Model.Trader.CIN</dd>
+
+                <dt class="col-sm-4">GST No</dt>
+                <dd class="col-sm-8">@Model.Trader.GSTNo</dd>
+
+                <dt class="col-sm-4">ISO</dt>
+                <dd class="col-sm-8">@Model.Trader.ISO</dd>
+
+                <dt class="col-sm-4">Annual Turnover</dt>
+                <dd class="col-sm-8">@Model.Trader.Turnover</dd>
+
+                <dt class="col-sm-4">Registration Date</dt>
+                <dd class="col-sm-8">@Model.Trader.RegistrationDate.ToString("dd MMM yyyy")</dd>
+
+                <dt class="col-sm-4">Trust Score</dt>
+                <dd class="col-sm-8">@Model.Trader.TrustScore</dd>
+            </dl>
+        </div>
+    </div>
+
+    <div class="mt-3">
+        <a asp-controller="Home" asp-action="Index" class="btn btn-secondary">⬅ Back to Dashboard</a>
+        <a asp-controller="Trader" asp-action="Edit" class="btn btn-primary">✏ Edit Profile</a>
+    </div>
+</div>

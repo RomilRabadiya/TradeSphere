@@ -1,0 +1,106 @@
+﻿@model TradeSphere3.Models.Feedback
+
+@{
+    ViewData["Title"] = "Leave Feedback";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+
+            <!-- Product Info Card -->
+            <div class="card mb-4 shadow-sm border-0">
+                <div class="card-body d-flex align-items-center">
+                    <div class="me-3">
+                        <i class="fas fa-box fa-3x text-primary"></i>
+                    </div>
+                    <div>
+                        <h4 class="mb-1">@ViewBag.ProductName</h4>
+                        <small class="text-muted">
+                            You purchased this product — share your feedback!
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feedback Form -->
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-star me-2"></i>Leave Feedback</h5>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Create" method="post">
+                        @Html.AntiForgeryToken()
+
+                        <!-- Validation Summary -->
+                        <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+                        <!-- Hidden IDs (important to avoid validation errors) -->
+                        <input type="hidden" asp-for="ProductId" />
+                        <input type="hidden" name="UserId" value="@ViewBag.UserId" />
+                        <input type="hidden" asp-for="OrderId" />
+
+                        <!-- Rating Section -->
+                        <div class="mb-4">
+                            <label asp-for="Rating" class="form-label fw-bold">Your Rating</label>
+                            <div class="star-rating">
+                                <input type="radio" id="star5" name="Rating" value="5" /><label for="star5" title="Excellent">★</label>
+                                <input type="radio" id="star4" name="Rating" value="4" /><label for="star4" title="Very Good">★</label>
+                                <input type="radio" id="star3" name="Rating" value="3" /><label for="star3" title="Good">★</label>
+                                <input type="radio" id="star2" name="Rating" value="2" /><label for="star2" title="Fair">★</label>
+                                <input type="radio" id="star1" name="Rating" value="1" /><label for="star1" title="Poor">★</label>
+                            </div>
+                            <span asp-validation-for="Rating" class="text-danger"></span>
+                        </div>
+
+                        <!-- Comment -->
+                        <div class="mb-4">
+                            <label asp-for="Comment" class="form-label fw-bold">Your Feedback</label>
+                            <textarea asp-for="Comment" class="form-control" rows="4"
+                                      placeholder="Write about product quality, delivery experience, or any improvements..."></textarea>
+                            <span asp-validation-for="Comment" class="text-danger"></span>
+                        </div>
+
+                        <!-- Submit -->
+                        <button type="submit" class="btn btn-success w-100">
+                            <i class="fas fa-paper-plane me-2"></i>Submit Feedback
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Rating CSS -->
+<style>
+    .star-rating {
+        display: flex;
+        flex-direction: row-reverse;
+        justify-content: flex-end;
+        font-size: 1.8rem;
+        cursor: pointer;
+    }
+
+        .star-rating input {
+            display: none;
+        }
+
+        .star-rating label {
+            color: #ddd;
+            transition: color 0.2s;
+            padding: 0 2px;
+        }
+
+        /* keep stars yellow when checked */
+        .star-rating input:checked ~ label {
+            color: #ffc107;
+        }
+
+        /* hover effect */
+        .star-rating label:hover,
+        .star-rating label:hover ~ label {
+            color: #ffdb58;
+        }
+</style>

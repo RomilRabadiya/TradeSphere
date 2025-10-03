@@ -1,0 +1,92 @@
+@model IEnumerable<Order>
+
+@{
+    ViewData["Title"] = "My Orders";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@ViewData["Title"] - TraadeSphere_vrund</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
+</head>
+<body>
+    <div class="container py-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2>My Orders</h2>
+            <a href="@Url.Action("Index", "Product")" class="btn btn-primary">Continue Shopping</a>
+        </div>
+        
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success">@TempData["Success"]</div>
+        }
+        
+        @if (Model.Any())
+        {
+            <div class="row">
+                @foreach (var order in Model.OrderByDescending(o => o.OrderDate))
+                {
+                    <div class="col-md-6 mb-3">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h6 class="mb-0">Order #@order.OrderId</h6>
+                                <span class="badge @(GetStatusBadgeClass(order.Status))">@order.Status</span>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        @if (order.Product != null)
+                                        {
+                                            <h6>@order.Product.Name</h6>
+                                            <p class="text-muted mb-1">@(order.Product.Description ?? "No description")</p>
+                                        }
+                                        <p class="mb-1"><strong>Quantity:</strong> @order.Quantity</p>
+                                        <p class="mb-1"><strong>Total:</strong> $@((order.Price * order.Quantity).ToString("F2"))</p>
+                                        <p class="mb-1"><strong>Order Date:</strong> @order.OrderDate.ToString("MMM dd, yyyy")</p>
+                                    </div>
+                                </div>
+                                
+                                @if (!string.IsNullOrEmpty(order.ShippingAddress))
+                                {
+                                    <hr class="my-2">
+                                    <p class="mb-0"><strong>Shipping:</strong> @order.ShippingAddress</p>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-info text-center">
+                <h4>No Orders Yet</h4>
+                <p>You haven't placed any orders yet.</p>
+                <a href="@Url.Action("Index", "Product")" class="btn btn-primary">Start Shopping</a>
+            </div>
+        }
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+
+@{
+    string GetStatusBadgeClass(string status)
+    {
+        return status switch
+        {
+            "Pending" => "bg-warning",
+            "Confirmed" => "bg-info",
+            "Shipped" => "bg-primary",
+            "Delivered" => "bg-success",
+            "Cancelled" => "bg-danger",
+            _ => "bg-secondary"
+        };
+    }
+}
