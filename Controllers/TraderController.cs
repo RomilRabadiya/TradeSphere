@@ -42,50 +42,60 @@ namespace TradeSphere3.Controllers
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    //[Authorize(Roles = "Trader")]
     public async Task<IActionResult> Apply(TraderDto dto)
     {
-        if (!ModelState.IsValid)
-            return View(dto);
+            if (!ModelState.IsValid)
+                return View(dto);
 
-        //var user = await _userManager.GetUserAsync(User);
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
 
-        var user = await _userManager.GetUserAsync(User);
-        if (user != null)
-        {
-            // Ensure Trader role exists
+            // Check if Trader already exists for this user
+            var existingTrader = await _context.Traders
+                .FirstOrDefaultAsync(t => t.UserId == user.Id);
+
+            if (existingTrader != null)
+            {
+                // Option 1: Delete old trader record
+                _context.Traders.Remove(existingTrader);
+                await _context.SaveChangesAsync();
+            }
+
+            //Ensure Trader role exists
             if (!await _roleManager.RoleExistsAsync("Trader"))
             {
                 await _roleManager.CreateAsync(new IdentityRole("Trader"));
             }
 
-            // Remove old role (User)
+            //Update user roles
             if (await _userManager.IsInRoleAsync(user, "User"))
             {
                 await _userManager.RemoveFromRoleAsync(user, "User");
             }
 
-            // Add new role (Trader)
             if (!await _userManager.IsInRoleAsync(user, "Trader"))
             {
                 await _userManager.AddToRoleAsync(user, "Trader");
             }
+
+            //Map and save new trader
+            var trader = _mapper.Map<Trader>(dto);
+            trader.UserId = user.Id;
+            trader.RegistrationDate = DateTime.Now;
+
+            _context.Traders.Add(trader);
+            await _context.SaveChangesAsync();
+
+            //Update user entity with trader link (if navigation property exists)
+            user.Trader = trader;
+            await _userManager.UpdateAsync(user);
+
+            TempData["Message"] = "Trader application submitted successfully!";
+            return RedirectToAction("Index", "Home");
         }
-
-        var trader = _mapper.Map<Trader>(dto);
-        trader.UserId = user.Id;
-        trader.RegistrationDate = DateTime.Now;
-
-        _context.Traders.Add(trader);
-        await _context.SaveChangesAsync();
-
-        // update user to mark as trader
-        user.Trader = trader;
-        await _userManager.UpdateAsync(user);
-
-        TempData["Message"] = "Trader application submitted successfully!";
-        return RedirectToAction("Index", "Home");
-    }
 
     [HttpGet]
     [Authorize(Roles = "Trader")]
@@ -226,7 +236,11 @@ namespace TradeSphere3.Controllers
         }
 
 
+        public async Task<JsonResult> IsEmailAvailable(string email)
+        {
+            var exists = await _context.Traders.AnyAsync(t => t.Email == email);
+            return Json(!exists); // true = valid
+        }
 
-        
     }
 }

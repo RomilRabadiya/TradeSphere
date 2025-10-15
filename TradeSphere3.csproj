@@ -23,14 +23,10 @@
   <ItemGroup>
     <!-- .NET Core 3.1 Latest Stable Versions -->
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="3.1.32" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="3.1.32">
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.32" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="3.1.32">
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      <PrivateAssets>all</PrivateAssets>
+    <!-- EF Core design-time services required by dotnet-ef -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="3.1.32">
+      <PrivateAssets>All</PrivateAssets>
     </PackageReference>
     <!-- Additional .NET Core 3.1 Performance and Security Packages -->
     <PackageReference Include="Microsoft.AspNetCore.DataProtection" Version="3.1.32" />

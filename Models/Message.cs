@@ -26,6 +26,8 @@ namespace TradeSphere3.Models
         [MaxLength(20)]
         public string Status { get; set; } = "Unread"; // Default status
 
+
+
         // Navigation properties for the original direction (User -> Trader)
         [ForeignKey("SenderId")]
         public virtual ApplicationUser? Sender { get; set; }

@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TradeSphere3.Data;
 
 namespace TradeSphere3.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251014112348_MakeProductIdNullableInOrders")]
+    partial class MakeProductIdNullableInOrders
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -332,9 +334,6 @@ namespace TradeSphere3.Migrations
                         .HasColumnType("nvarchar(20)")
                         .HasMaxLength(20);
 
-                    b.Property<int?>("TraderId")
-                        .HasColumnType("int");
-
                     b.Property<string>("UserId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
@@ -342,8 +341,6 @@ namespace TradeSphere3.Migrations
                     b.HasKey("OrderId");
 
                     b.HasIndex("ProductId");
-
-                    b.HasIndex("TraderId");
 
                     b.HasIndex("UserId");
 
@@ -576,11 +573,6 @@ namespace TradeSphere3.Migrations
                     b.HasOne("TradeSphere3.Models.Product", "Product")
                         .WithMany()
                         .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("TradeSphere3.Models.Trader", "Trader")
-                        .WithMany()
-                        .HasForeignKey("TraderId")
                         .OnDelete(DeleteBehavior.NoAction);
 
                     b.HasOne("TradeSphere3.Models.ApplicationUser", "User")

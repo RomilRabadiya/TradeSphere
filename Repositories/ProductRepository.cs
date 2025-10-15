@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -22,7 +22,6 @@ namespace TradeSphere3.Repositories
         {
             return _context.Products
                 .Include(p => p.Trader)
-                // .Include(p => p.Feedbacks) // Temporarily commented out
                 .FirstOrDefault(p => p.ProductId == id);
         }
 
@@ -30,7 +29,6 @@ namespace TradeSphere3.Repositories
         {
             return await _context.Products
                 .Include(p => p.Trader)
-                // .Include(p => p.Feedbacks) // Temporarily commented out
                 .FirstOrDefaultAsync(p => p.ProductId == id);
         }
 
@@ -38,14 +36,12 @@ namespace TradeSphere3.Repositories
         {
             return _context.Products
                 .Include(p => p.Trader)
-                // .Include(p => p.Feedbacks) // Temporarily commented out
                 .ToList();
         }
 
         public IEnumerable<Product> GetByTraderId(int traderId)
         {
             return _context.Products
-                // .Include(p => p.Feedbacks) // Temporarily commented out
                 .Where(p => p.TraderId == traderId)
                 .ToList();
         }
@@ -53,7 +49,6 @@ namespace TradeSphere3.Repositories
         public IEnumerable<Product> GetByName(string name)
         {
             return _context.Products
-                // .Include(p => p.Feedbacks) // Temporarily commented out
                 .Where(p => p.Name.Contains(name))
                 .ToList();
         }
@@ -61,7 +56,6 @@ namespace TradeSphere3.Repositories
         public IEnumerable<Product> GetByPriceRange(decimal minPrice, decimal maxPrice)
         {
             return _context.Products
-                // .Include(p => p.Feedbacks) // Temporarily commented out
                 .Where(p => p.Price >= minPrice && p.Price <= maxPrice)
                 .ToList();
         }
@@ -89,23 +83,6 @@ namespace TradeSphere3.Repositories
             _context.SaveChanges();
         }
 
-        // Delete
-        public void Delete(int id)
-        {
-            var product = GetById(id);
-            if (product != null)
-            {
-                _context.Products.Remove(product);
-                _context.SaveChanges();
-            }
-        }
-
-        public void Delete(Product product)
-        {
-            _context.Products.Remove(product);
-            _context.SaveChanges();
-        }
-
         // Utility
         public bool Exists(int id)
         {
@@ -122,17 +99,31 @@ namespace TradeSphere3.Repositories
             return _context.Products.Count(p => p.TraderId == traderId);
         }
 
-        // Feedback stats - temporarily disabled due to Feedbacks table issues
-        public double GetAverageRating(int productId)
+
+
+        public void Delete(int id)
         {
-            // return _context.Feedbacks.Where(f => f.ProductId == productId).Average(f => f.Rating);
-            return 0; // Temporarily return 0 until Feedbacks table is working
+            var product = _context.Products.FirstOrDefault(p => p.ProductId == id);
+            if (product != null)
+            {
+                // Delete all feedback related to this product
+                var feedbacks = _context.Feedbacks.Where(f => f.ProductId == id).ToList();
+                if (feedbacks.Any())
+                    _context.Feedbacks.RemoveRange(feedbacks);
+
+                // Nullify product reference in Orders (keep them for records)
+                var relatedOrders = _context.Orders.Where(o => o.ProductId == id).ToList();
+                foreach (var order in relatedOrders)
+                {
+                    order.ProductId = null;
+                    order.Product = null;
+                }
+
+                // Remove product itself
+                _context.Products.Remove(product);
+                _context.SaveChanges();
+            }
         }
 
-        public int GetReviewCount(int productId)
-        {
-            // return _context.Feedbacks.Count(f => f.ProductId == productId);
-            return 0; // Temporarily return 0 until Feedbacks table is working
-        }
     }
 }

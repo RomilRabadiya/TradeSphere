@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity;
 using TradeSphere3.Repositories;
@@ -121,6 +121,7 @@ namespace TradeSphere3.Controllers
                     var order = new Order
                     {
                         ProductId = productId,
+                        TraderId = product.TraderId, //store trader permanently
                         Quantity = quantity,
                         Price = product.Price,
                         ShippingAddress = shippingAddress,

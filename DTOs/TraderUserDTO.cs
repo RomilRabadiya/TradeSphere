@@ -1,25 +1,63 @@
 using System;
-using TradeSphere3.DTOs;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNetCore.Mvc;
+
 
 namespace TradeSphere3.DTOs
 {
     public class TraderDto
     {
+        [Key]
         public int Id { get; set; }
+
+        [Required(ErrorMessage = "Company name is required")]
+        [StringLength(200)]
         public string Name { get; set; }
+        
+        [Required(ErrorMessage = "Email is required")]
+        [EmailAddress(ErrorMessage = "Invalid email address")]
+        [Remote(action: "IsEmailAvailable", controller: "Trader", ErrorMessage = "This email is already registered as a Trader.")]
         public string Email { get; set; }
+
+        [Required(ErrorMessage = "Phone is required")]
+        [Phone(ErrorMessage = "Invalid phone number")]
         public string Phone { get; set; }
+
+        [Required(ErrorMessage = "Trade role is required")]
+        [StringLength(20)]
         public string TradeRole { get; set; }
+
+        [StringLength(50)]
         public string CIN { get; set; }
+
+        [StringLength(50)]
         public string GSTNo { get; set; }
+
+        [StringLength(50)]
         public string ISO { get; set; }
+        
+        [Required(ErrorMessage = "Country is required")]
+        [StringLength(100)]
         public string Country { get; set; }
+        
+        [StringLength(100)]
         public string State { get; set; }
+
+        [StringLength(100)]
         public string City { get; set; }
+        
+        [StringLength(300)]
         public string Address { get; set; }
+
+        [Column(TypeName = "decimal(18,2)")]
         public decimal Turnover { get; set; }
+
+        [DataType(DataType.Date)]
         public DateTime RegistrationDate { get; set; }
-        public decimal TrustScore { get; set; }
+
+        public int TrustScore { get; set; }
+
     }
 
     public class UserWithTraderDto

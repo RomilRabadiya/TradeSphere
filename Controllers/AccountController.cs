@@ -7,11 +7,15 @@ using System.Threading.Tasks;
 
 namespace TradeSphere3.Controllers
 {
+    //IN Register We can Create User in userManager With assign password and role
+
+    //In login We can Check User is Registered or not By SignInManager
+
     public class AccountController : Controller
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
-        private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly RoleManager<IdentityRole> _roleManager; 
 
         public AccountController(
             UserManager<ApplicationUser> userManager,
@@ -33,7 +37,7 @@ namespace TradeSphere3.Controllers
 
         // POST: Register
         [HttpPost]
-        [AllowAnonymous]
+        [AllowAnonymous]//Endpoint Access by Any
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(RegisterViewModel model)
         {
@@ -47,11 +51,11 @@ namespace TradeSphere3.Controllers
                 FullName = model.FullName
             };
 
+            //Save User in UserManager With Passowrd
             var result = await _userManager.CreateAsync(user, model.Password);
 
             if (result.Succeeded)
             {
-                // ✅ Assign role if selected
                 if (!string.IsNullOrEmpty(model.Role))
                 {
                     // Ensure role exists before assigning
@@ -60,6 +64,7 @@ namespace TradeSphere3.Controllers
                         await _roleManager.CreateAsync(new IdentityRole(model.Role));
                     }
 
+                    //assign Role to User
                     var roleResult = await _userManager.AddToRoleAsync(user, model.Role);
 
                     if (!roleResult.Succeeded)
@@ -72,6 +77,7 @@ namespace TradeSphere3.Controllers
                     }
                 }
 
+                //sign in User WithOut Password
                 await _signInManager.SignInAsync(user, false);
                 return RedirectToAction("Index", "Home");
             }
@@ -101,6 +107,7 @@ namespace TradeSphere3.Controllers
             if (!ModelState.IsValid)
                 return View(model);
 
+            //Check Email and password match with Registered User
             var result = await _signInManager.PasswordSignInAsync(
                 model.Email,
                 model.Password,

@@ -41,8 +41,6 @@ namespace TradeSphere3.Models
         [ForeignKey("TraderId")]
         public virtual Trader Trader { get; set; }
 
-        // public ICollection<Feedback> Feedbacks { get; set; } // Temporarily removed
-
     }
 
 

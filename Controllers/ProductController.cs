@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
 
 namespace TradeSphere3.Controllers
@@ -274,55 +275,6 @@ namespace TradeSphere3.Controllers
             return View(model);
         }
 
-        // Delete product - only for traders (owner)
-        [Authorize(Roles = "Trader")]
-        public IActionResult Delete(int id)
-        {
-            try
-            {
-                var product = _productRepository.GetById(id);
-                if (product == null)
-                {
-                    return NotFound();
-                }
-
-                // TODO: Check if current user is the owner
-                // if (product.TraderId != currentUserId) return Forbid();
-
-                return View(product);
-            }
-            catch (Exception)
-            {
-                return NotFound();
-            }
-        }
-
-        [HttpPost]
-        [Authorize(Roles = "Trader")]
-        public IActionResult Delete(int id, IFormCollection form)
-        {
-            try
-            {
-                var product = _productRepository.GetById(id);
-                if (product == null)
-                {
-                    return NotFound();
-                }
-
-                // TODO: Check if current user is the owner
-                // if (product.TraderId != currentUserId) return Forbid();
-
-                _productRepository.Delete(id);
-                TempData["Success"] = "Product deleted successfully!";
-                return RedirectToAction("Index");
-            }
-            catch (Exception ex)
-            {
-                TempData["Error"] = "Error deleting product: " + ex.Message;
-                return RedirectToAction("Index");
-            }
-        }
-
 
         [HttpPost]
         [Authorize(Roles = "Trader")]
@@ -336,6 +288,68 @@ namespace TradeSphere3.Controllers
             await _context.SaveChangesAsync();
 
             return RedirectToAction("MyProducts"); // refresh the product list
+        }
+
+
+
+
+
+
+        public IActionResult Delete(int id)
+        {
+            var product = _productRepository.GetById(id);
+            if (product == null)
+            {
+                TempData["Error"] = "Product not found.";
+                return RedirectToAction("Index");
+            }
+
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var trader = _context.Traders.FirstOrDefault(t => t.UserId == userId);
+            if (trader == null)
+            {
+                TempData["Error"] = "You are not authorized to delete this product.";
+                return RedirectToAction("Index");
+            }
+
+            if (product.TraderId != trader.TraderId)
+            {
+                TempData["Error"] = "You are not authorized to delete this product.";
+                return RedirectToAction("Index");
+            }
+
+            return View(product);
+        }
+
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public IActionResult DeleteConfirmed(int id)
+        {
+            var product = _productRepository.GetById(id);
+            if (product == null)
+            {
+                TempData["Error"] = "Product not found.";
+                return RedirectToAction("MyProducts");
+            }
+
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var trader = _context.Traders.FirstOrDefault(t => t.UserId == userId);
+            if (trader == null)
+            {
+                TempData["Error"] = "You are not authorized to delete this product.";
+                return RedirectToAction("MyProducts");
+            }
+
+            if (product.TraderId != trader.TraderId)
+            {
+                TempData["Error"] = "You are not authorized to delete this product.";
+                return RedirectToAction("MyProducts");
+            }
+
+            _productRepository.Delete(id);
+
+            TempData["Success"] = "Product and its feedbacks deleted successfully! Orders retained.";
+            return RedirectToAction("MyProducts");
         }
     }
 }

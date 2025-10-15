@@ -13,11 +13,10 @@ namespace TradeSphere3.Models
         public DateTime OrderDate { get; set; } = DateTime.UtcNow; // Default to now
 
         // FK to Product
-        [Required]
-        public int ProductId { get; set; }
+        public int? ProductId { get; set; }
 
         [ForeignKey("ProductId")]
-        public virtual Product Product { get; set; }
+        public virtual Product? Product { get; set; }
 
         [Required]
         public int Quantity { get; set; } = 1;  // Default = 1
@@ -44,5 +43,13 @@ namespace TradeSphere3.Models
 
         [ForeignKey("UserId")]
         public virtual ApplicationUser User { get; set; }
+
+
+
+        // NEW: Keep track of Trader even if Product is deleted
+        public int? TraderId { get; set; }
+
+        [ForeignKey("TraderId")]
+        public virtual Trader Trader { get; set; }
     }
 }

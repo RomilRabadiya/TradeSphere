@@ -36,11 +36,14 @@
                 <p class="text-muted small mb-1">🔍 Filter by <strong>category, price, or rating</strong>.</p>
                 <p class="text-muted small mb-3">⭐ Read real feedback and order securely.</p>
 
+                
                 <!-- Button -->
                 <a asp-controller="TraderDirectory" asp-action="List"
                    class="btn btn-browse rounded-pill px-4 py-2 fw-semibold">
                     Start Browsing <i class="fas fa-arrow-right ms-2"></i>
                 </a>
+
+
             </div>
         </div>
     </div>
@@ -110,6 +113,14 @@
             <p>View all customer orders for your products</p>
             <a href="@Url.Action("Index", "Order")" class="btn btn-warning">
                 <i class="fas fa-list me-1"></i> View Orders
+            </a>
+        </div>
+        <div class="dashboard-card card-warning">
+            <i class="fas fa-comments card-icon"></i>
+            <h5>Messages</h5>
+            <p>Customer communication and support</p>
+            <a href="@Url.Action("Index", "Message")" class="btn btn-warning">
+                <i class="fas fa-envelope me-1"></i>View Messages
             </a>
         </div>
         <div class="dashboard-card card-info">
@@ -187,15 +198,6 @@
                 <i class="fas fa-shopping-cart me-1"></i>Manage Orders
             </a>
         </div>
-
-        <div class="dashboard-card card-warning">
-            <i class="fas fa-comments card-icon"></i>
-            <h5>Messages</h5>
-            <p>Customer communication and support</p>
-            <a href="@Url.Action("Index", "Message")" class="btn btn-warning">
-                <i class="fas fa-envelope me-1"></i>View Messages
-            </a>
-        </div>
     </div>
 
     <!-- Account Actions -->
@@ -214,6 +216,11 @@
         </div>
     </div>
 </div>
+
+
+<a href="@Url.Action("remove", "TraderDirectory")" class="btn btn-info">
+    <i class="fas fa-shopping-cart me-1"></i>Manage Orders
+</a>
 
 @*@section Scripts {
     <script src="~/js/tradesphere.js"></script>
