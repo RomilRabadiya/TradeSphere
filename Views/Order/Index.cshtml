@@ -1,59 +1,112 @@
-@model IEnumerable<Order>
+@model IEnumerable<TradeSphere3.Models.Order>
 
-@{
+    @{
     ViewData["Title"] = "All Orders";
-}
+    }
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>@ViewData["Title"] - TraadeSphere_vrund</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" />
-</head>
-<body>
-    <div class="container py-4">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h2>All Orders</h2>
-            <a href="@Url.Action("Index", "Product")" class="btn btn-primary">Back to Products</a>
-        </div>
-        
-        @if (Model.Any())
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>@ViewData["Title"] - TradeSphere</title>
+        <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+        <link rel="stylesheet" href="~/css/site.css" />
+        <style>
+            .deleted-product {
+                background-color: #fff5f5;
+                border: 1px solid #ffcccc;
+                border-radius: 8px;
+                padding: 10px 12px;
+                margin-bottom: 10px;
+            }
+
+            .deleted-icon {
+                color: #ff4d4d;
+                font-weight: bold;
+                margin-right: 6px;
+                font-size: 16px;
+                vertical-align: middle;
+            }
+
+            .deleted-title {
+                font-weight: 600;
+                color: #b30000;
+            }
+
+            .deleted-text {
+                color: #666;
+                font-size: 0.9rem;
+                margin: 4px 0 0 22px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container py-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2>All Orders</h2>
+                <a href="@Url.Action("Index", "Product")" class="btn btn-primary">
+                    <i class="fas fa-box me-1"></i> Back to Products
+                </a>
+            </div>
+
+            @if (Model != null && Model.Any())
         {
             <div class="row">
                 @foreach (var order in Model.OrderByDescending(o => o.OrderDate))
                 {
-                    <div class="col-md-6 mb-3">
-                        <div class="card">
-                            <div class="card-header d-flex justify-content-between align-items-center">
-                                <h6 class="mb-0">Order #@order.OrderId</h6>
-                                <span class="badge @(GetStatusBadgeClass(order.Status))">@order.Status</span>
-                            </div>
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col-md-8">
-                                        @if (order.Product != null)
-                                        {
-                                            <h6>@order.Product.Name</h6>
-                                            <p class="text-muted mb-1">@(order.Product.Description ?? "No description")</p>
-                                        }
-                                        <p class="mb-1"><strong>Quantity:</strong> @order.Quantity</p>
-                                        <p class="mb-1"><strong>Total:</strong> $@((order.Price * order.Quantity).ToString("F2"))</p>
-                                        <p class="mb-1"><strong>Order Date:</strong> @order.OrderDate.ToString("MMM dd, yyyy")</p>
-                                        <p class="mb-1"><strong>Customer:</strong> @(order.User?.Email ?? "Unknown")</p>
-                                    </div>
+                <div class="col-md-6 mb-4">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header d-flex justify-content-between align-items-center bg-light">
+                            <h6 class="mb-0 fw-bold">Order #@order.OrderId</h6>
+                            <span class="badge @GetStatusBadgeClass(order.Status)">
+                                @order.Status
+                            </span>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    @* Product Details *@
+                                    @if (order.Product != null)
+                                    {
+                                        <h6 class="text-dark fw-semibold">@order.Product.Name</h6>
+                                        <p class="text-muted small mb-2">@order.Product.Description</p>
+                                    }
+                                    else
+                                    {
+                                        <div class="deleted-product">
+                                            <i class="fas fa-times-circle deleted-icon"></i>
+                                            <span class="deleted-title">(Deleted Product)</span>
+                                            <p class="deleted-text">This product is no longer available.</p>
+                                        </div>
+                                    }
+
+
+                                    <p class="mb-1">
+                                        <strong>Quantity:</strong> @order.Quantity
+                                    </p>
+                                    <p class="mb-1">
+                                        <strong>Total:</strong> ₹@((order.Price * order.Quantity).ToString("F2"))
+                                    </p>
+                                    <p class="mb-1">
+                                        <strong>Order Date:</strong> @order.OrderDate.ToString("MMM dd, yyyy")
+                                    </p>
+                                    <p class="mb-1">
+                                        <strong>Customer:</strong> @(order.User?.Email ?? "Unknown")
+                                    </p>
                                 </div>
-                                
-                                @if (!string.IsNullOrEmpty(order.ShippingAddress))
-                                {
-                                    <hr class="my-2">
-                                    <p class="mb-0"><strong>Shipping:</strong> @order.ShippingAddress</p>
-                                }
                             </div>
+
+                            @if (!string.IsNullOrEmpty(order.ShippingAddress))
+                                {
+                            <hr class="my-2" />
+                            <p class="mb-0">
+                                <strong>Shipping:</strong> @order.ShippingAddress
+                            </p>
+                                }
                         </div>
                     </div>
+                </div>
                 }
             </div>
         }
@@ -61,24 +114,24 @@
         {
             <div class="alert alert-info text-center">
                 <h4>No Orders Found</h4>
-                <p>There are no orders in the system yet.</p>
+                <p>There are currently no orders in the system.</p>
                 <a href="@Url.Action("Index", "Product")" class="btn btn-primary">View Products</a>
             </div>
         }
-    </div>
+        </div>
 
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-</body>
+        <script src="~/lib/jquery/dist/jquery.min.js"></script>
+        <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    </body>
 </html>
 
-@{
+@functions {
     string GetStatusBadgeClass(string status)
     {
         return status switch
         {
-            "Pending" => "bg-warning",
-            "Confirmed" => "bg-info", 
+            "Pending" => "bg-warning text-dark",
+            "Confirmed" => "bg-info text-dark",
             "Shipped" => "bg-primary",
             "Delivered" => "bg-success",
             "Cancelled" => "bg-danger",

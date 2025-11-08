@@ -1,0 +1,21 @@
+@* Trader Search Bar Partial View *@
+<form method="get" class="d-flex gap-2 mb-3">
+    <div class="flex-grow-1">
+        <div class="row g-2">
+            <div class="col-md-4">
+                <input name="name" value="@Context.Request.Query["name"]" class="form-control" placeholder="Search by Name" />
+            </div>
+            <div class="col-md-4">
+                <input name="cin" value="@Context.Request.Query["cin"]" class="form-control" placeholder="Search by CIN" />
+            </div>
+            <div class="col-md-4">
+                <input name="gstNo" value="@Context.Request.Query["gstNo"]" class="form-control" placeholder="Search by GST No" />
+            </div>
+            <div class="col-12">
+                <button type="submit" class="btn btn-dark">
+                    <i class="bi bi-search"></i> Search
+                </button>
+            </div>
+        </div>
+    </div>
+</form>

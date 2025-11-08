@@ -50,17 +50,33 @@ namespace TradeSphere3
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();
 
-            // Register Repositories (Scoped is best here ✅)
+            // Configure Cookie Authentication for SignalR
+            services.ConfigureApplicationCookie(options =>
+            {
+                options.Cookie.HttpOnly = true;
+                options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
+                options.LoginPath = "/Account/Login";
+                options.AccessDeniedPath = "/Account/AccessDenied";
+                options.SlidingExpiration = true;
+            });
+
+    // Register Repositories (Scoped is best here ✅)
             services.AddScoped<ITraderRepository, TraderRepository>();
             services.AddScoped<IProductRepository, ProductRepository>();
             services.AddScoped<IOrderRepository, OrderRepository>();
-            services.AddScoped<IMessageRepositry, MessageRepository>();
             services.AddScoped<IFeedbackRepository, FeedbackRepository>();
+            services.AddScoped<IMessageRepository, MessageRepository>();
+
+            // Add SignalR
+            services.AddSignalR();
+
             // Add MVC
             services.AddControllersWithViews();
 
             // AutoMapper (registers all Profiles in same assembly as UserTraderMapper ✅)
             services.AddAutoMapper(typeof(UserTraderMapper));
+
+
         }
 
         // Configure the HTTP request pipeline
@@ -80,16 +96,20 @@ namespace TradeSphere3
             app.UseStaticFiles();
 
             app.UseRouting();
-
-            // Enable Authentication + Authorization
+            
+            // ✅ CRITICAL: Authentication MUST come before Authorization
             app.UseAuthentication();
             app.UseAuthorization();
 
+            // ✅ Map SignalR Hub and MVC endpoints
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
+                
+                // Map SignalR Hub
+                endpoints.MapHub<TradeSphere3.Hubs.ChatHub>("/hubs/chat");
             });
         }
     }

@@ -12,6 +12,35 @@
     <title>@ViewData["Title"] - TraadeSphere_vrund</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" />
+    <style>
+        .deleted-product {
+            background-color: #fff5f5;
+            border: 1px solid #ffcccc;
+            border-radius: 8px;
+            padding: 10px 12px;
+            margin-bottom: 10px;
+        }
+
+        .deleted-icon {
+            color: #ff4d4d;
+            font-weight: bold;
+            margin-right: 6px;
+            font-size: 16px;
+            vertical-align: middle;
+        }
+
+        .deleted-title {
+            font-weight: 600;
+            color: #b30000;
+        }
+
+        .deleted-text {
+            color: #666;
+            font-size: 0.9rem;
+            margin: 4px 0 0 22px;
+        }
+
+    </style>
 </head>
 <body>
     <div class="container py-4">
@@ -41,8 +70,16 @@
                                     <div class="col-md-8">
                                         @if (order.Product != null)
                                         {
-                                            <h6>@order.Product.Name</h6>
-                                            <p class="text-muted mb-1">@(order.Product.Description ?? "No description")</p>
+                                        <h6>@order.Product.Name</h6>
+                                        <p class="text-muted mb-1">@(order.Product.Description ?? "No description")</p>
+                                        }
+                                        else
+                                        {
+                                            <div class="deleted-product">
+                                                <span class="deleted-icon">✖</span>
+                                                <span class="deleted-title">(Deleted Product)</span>
+                                                <p class="deleted-text">This product is no longer available.</p>
+                                            </div>
                                         }
                                         <p class="mb-1"><strong>Quantity:</strong> @order.Quantity</p>
                                         <p class="mb-1"><strong>Total:</strong> $@((order.Price * order.Quantity).ToString("F2"))</p>

@@ -1,0 +1,40 @@
+@model List<TradeSphere3.Models.Dto.TraderDto>
+
+<div class="container py-4">
+    <h4 class="mb-3">Start New Chat</h4>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">
+            No new traders available to start a chat with.
+        </div>
+        <div class="text-center">
+            <a href="/ChatView/Chatboard" class="btn btn-secondary">Back to Chats</a>
+        </div>
+    }
+    else
+    {
+        <div class="list-group">
+            @foreach (var trader in Model)
+            {
+                <div class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="mb-1">@trader.Name</h5>
+                        <p class="mb-1">@trader.Email</p>
+                        <small class="text-muted">@trader.City, @trader.Country</small>
+                        @if (trader.TradeRole != null)
+                        {
+                            <span class="badge bg-primary ms-2">@trader.TradeRole</span>
+                        }
+                    </div>
+                    <a href="/Chat/StartChat?traderId=@trader.TraderId" class="btn btn-primary">
+                        Start Chat
+                    </a>
+                </div>
+            }
+        </div>
+        <div class="text-center mt-3">
+            <a href="/ChatView/Chatboard" class="btn btn-outline-secondary">Back to Chats</a>
+        </div>
+    }
+</div>

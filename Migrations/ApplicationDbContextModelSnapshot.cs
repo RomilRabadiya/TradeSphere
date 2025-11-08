@@ -209,6 +209,10 @@ namespace TradeSphere3.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Email")
+                        .IsUnique()
+                        .HasFilter("[Email] IS NOT NULL");
+
                     b.HasIndex("NormalizedEmail")
                         .HasName("EmailIndex");
 
@@ -243,9 +247,6 @@ namespace TradeSphere3.Migrations
                     b.Property<DateTime>("ReviewDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("TraderId")
-                        .HasColumnType("int");
-
                     b.Property<string>("UserId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
@@ -255,8 +256,6 @@ namespace TradeSphere3.Migrations
                     b.HasIndex("OrderId");
 
                     b.HasIndex("ProductId");
-
-                    b.HasIndex("TraderId");
 
                     b.HasIndex("UserId");
 
@@ -275,14 +274,34 @@ namespace TradeSphere3.Migrations
                         .HasColumnType("nvarchar(2000)")
                         .HasMaxLength(2000);
 
-                    b.Property<int>("ReceiverId")
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DeliveredAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("EditedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("ReadAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("ReceiverTraderId")
+                        .HasColumnName("ReceiverId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ReplyToMessageId")
                         .HasColumnType("int");
 
                     b.Property<string>("SenderId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<DateTime>("SentDate")
+                    b.Property<DateTime>("SentAt")
+                        .HasColumnName("SentDate")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Status")
@@ -292,7 +311,9 @@ namespace TradeSphere3.Migrations
 
                     b.HasKey("MessageId");
 
-                    b.HasIndex("ReceiverId");
+                    b.HasIndex("ReceiverTraderId");
+
+                    b.HasIndex("ReplyToMessageId");
 
                     b.HasIndex("SenderId");
 
@@ -317,7 +338,7 @@ namespace TradeSphere3.Migrations
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<int>("ProductId")
+                    b.Property<int?>("ProductId")
                         .HasColumnType("int");
 
                     b.Property<int>("Quantity")
@@ -333,6 +354,9 @@ namespace TradeSphere3.Migrations
                         .HasColumnType("nvarchar(20)")
                         .HasMaxLength(20);
 
+                    b.Property<int?>("TraderId")
+                        .HasColumnType("int");
+
                     b.Property<string>("UserId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
@@ -340,6 +364,8 @@ namespace TradeSphere3.Migrations
                     b.HasKey("OrderId");
 
                     b.HasIndex("ProductId");
+
+                    b.HasIndex("TraderId");
 
                     b.HasIndex("UserId");
 
@@ -545,11 +571,6 @@ namespace TradeSphere3.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("TradeSphere3.Models.Trader", "Trader")
-                        .WithMany()
-                        .HasForeignKey("TraderId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
                     b.HasOne("TradeSphere3.Models.ApplicationUser", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
@@ -559,11 +580,16 @@ namespace TradeSphere3.Migrations
 
             modelBuilder.Entity("TradeSphere3.Models.Message", b =>
                 {
-                    b.HasOne("TradeSphere3.Models.Trader", "Receiver")
+                    b.HasOne("TradeSphere3.Models.Trader", "ReceiverTrader")
                         .WithMany()
-                        .HasForeignKey("ReceiverId")
+                        .HasForeignKey("ReceiverTraderId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
+
+                    b.HasOne("TradeSphere3.Models.Message", "ReplyToMessage")
+                        .WithMany("Replies")
+                        .HasForeignKey("ReplyToMessageId")
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.HasOne("TradeSphere3.Models.ApplicationUser", "Sender")
                         .WithMany()
@@ -577,8 +603,12 @@ namespace TradeSphere3.Migrations
                     b.HasOne("TradeSphere3.Models.Product", "Product")
                         .WithMany()
                         .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("TradeSphere3.Models.Trader", "Trader")
+                        .WithMany()
+                        .HasForeignKey("TraderId")
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.HasOne("TradeSphere3.Models.ApplicationUser", "User")
                         .WithMany()

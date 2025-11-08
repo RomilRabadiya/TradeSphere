@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using TradeSphere3.Models;
+using System.Threading.Tasks;
 
 namespace TradeSphere3.Repositories
 {
@@ -37,5 +38,8 @@ namespace TradeSphere3.Repositories
             decimal GetTotalRevenue();
             decimal GetTotalRevenueByUserId(string userId);
             decimal GetTotalRevenueByDateRange(DateTime startDate, DateTime endDate);
+
+
+        Task<bool> HasOrdersForProductAsync(int productId);
     }
 }

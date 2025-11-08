@@ -1,9 +1,10 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using TradeSphere3.Data;
 using TradeSphere3.Models;
+using System.Threading.Tasks;
 
 namespace TradeSphere3.Repositories
 {
@@ -45,9 +46,9 @@ namespace TradeSphere3.Repositories
         public IEnumerable<Order> GetByTraderId(int traderId)
         {
             return _context.Orders
-                .Include(o => o.Product)
                 .Include(o => o.User)
-                .Where(o => o.Product.TraderId == traderId)
+                .Include(o => o.Product)
+                .Where(o => o.TraderId == traderId) // ✅ now safe and always valid
                 .ToList();
         }
 
@@ -168,6 +169,12 @@ namespace TradeSphere3.Repositories
             return _context.Orders
                 .Where(o => o.OrderDate >= startDate && o.OrderDate <= endDate)
                 .Sum(o => o.TotalAmount);
+        }
+
+
+        public async Task<bool> HasOrdersForProductAsync(int productId)
+        {
+            return await _context.Orders.AnyAsync(oi => oi.ProductId == productId);
         }
     }
 }

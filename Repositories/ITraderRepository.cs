@@ -17,5 +17,6 @@ namespace TradeSphere3.Repositories
         //search management
         Task<IEnumerable<Trader>> SearchAsync(string? name, string? cin, string? gstNo);
         Task<Trader?> GetBasicByIdAsync(int id);
+        Task<bool> DeleteTraderByEmailAsync(string email);
     }
 }

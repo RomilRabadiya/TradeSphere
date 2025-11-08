@@ -20,19 +20,13 @@ namespace TradeSphere3.Repositories
 
         // Update operations
         void Update(Product product);
-
-        // Delete operations
+        //Delete operations
         void Delete(int id);
-        void Delete(Product product);
 
         // Utility operations
         bool Exists(int id);
         int Count();
         int CountByTraderId(int traderId);
-
-
-        double GetAverageRating(int productId);
-        int GetReviewCount(int productId);
 
     }
 }

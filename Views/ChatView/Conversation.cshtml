@@ -1,0 +1,233 @@
+@model IEnumerable<TradeSphere3.Models.Dto.MessageDto>
+@{
+    ViewData["Title"] = "Conversation";
+    var senderTraderId = ViewBag.SenderTraderId;
+    var receiverTraderId = ViewBag.ReceiverTraderId;
+    var receiverName = ViewBag.ReceiverName ?? "Trader";
+}
+
+<div class="container py-3">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">@receiverName</h5>
+            <a asp-controller="ChatView" asp-action="Chatboard" class="btn btn-light btn-sm">
+                <i class="fas fa-arrow-left me-2"></i>Back
+            </a>
+        </div>
+
+        <div id="chatBox" class="card-body" style="height: 70vh; overflow-y: auto; background-color: #f7f7f7;">
+            @if (Model == null || !Model.Any())
+            {
+                <div class="text-center text-muted mt-5">
+                    <i class="bi bi-chat-left-text fs-1"></i>
+                    <p class="mt-3">No messages yet.<br />Start your conversation with @receiverName.</p>
+                </div>
+            }
+            else
+            {
+                @foreach (var msg in Model)
+                {
+                    bool isOwn = msg.SenderId == ViewBag.CurrentUserId;
+                    <div class="mb-2 @(isOwn ? "text-end" : "text-start")">
+                        <div class="d-inline-block p-2 rounded @(isOwn ? "bg-primary text-white" : "bg-light text-dark")" style="max-width:75%;">
+                            @msg.Content
+                        </div>
+                        <div><small class="text-muted">@msg.SentAt.ToLocalTime().ToString("hh:mm tt")</small></div>
+                    </div>
+                }
+            }
+        </div>
+            <input id="messageInput" type="text" class="form-control" placeholder="Type a message..." />
+            <button id="sendButton" class="btn btn-primary">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
+<script>
+    const receiverTraderId = @ViewBag.ReceiverTraderId;
+    const senderTraderId = @ViewBag.SenderTraderId;
+    const currentUserId = "@User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value";
+
+    const connection = new signalR.HubConnectionBuilder()
+        .withUrl("/hubs/chat")
+        .withAutomaticReconnect()
+        .build();
+
+    const chatBox = document.getElementById("chatBox");
+    const messageInput = document.getElementById("messageInput");
+    const sendButton = document.getElementById("sendButton");
+    const recipientNameEl = document.getElementById("recipientName");
+
+    // Load initial conversation
+    async function loadConversation(page = 0) {
+        try {
+            const response = await fetch(`/api/chat/conversation/${receiverTraderId}?page=${page}`);
+            const data = await response.json();
+
+            chatBox.innerHTML = '';
+
+            data.messages.forEach(msg => {
+                addMessageToUI(msg, msg.senderId === currentUserId);
+            });
+
+            // Scroll to bottom
+            chatBox.scrollTop = chatBox.scrollHeight;
+        } catch (error) {
+            console.error('Error loading conversation:', error);
+        }
+    }
+
+    function addMessageToUI(msg, isMine) {
+        const div = document.createElement("div");
+        div.id = `msg-${msg.messageId}`;
+        div.className = `d-flex ${isMine ? "justify-content-end" : "justify-content-start"} mb-2`;
+
+        const readStatus = msg.readAt ? '<i class="fas fa-check-double text-primary" style="font-size: 1.2em;"></i>' : '';
+        const editedLabel = msg.editedAt ? '<small class="text-muted">(edited)</small>' : '';
+        const timeStr = new Date(msg.sentAt).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
+
+        div.innerHTML = `
+            <div class="p-2 rounded" style="max-width:70%; background:${isMine ? "#007bff" : "#e9ecef"}; color:${isMine ? "white" : "black"};">
+                <div>${escapeHtml(msg.content)}</div>
+                <small class="text-muted d-block text-end">${timeStr} ${readStatus}</small>
+                ${editedLabel}
+            </div>
+        `;
+
+        chatBox.appendChild(div);
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // SignalR event handlers
+    connection.on("ReceiveMessage", (msg) => {
+        addMessageToUI(msg, false);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    });
+
+    connection.on("MessageUpdated", (data) => {
+        const msgEl = document.getElementById(`msg-${data.messageId}`);
+        if (msgEl) {
+            msgEl.querySelector('div').innerHTML = escapeHtml(data.newContent) + '<small class="text-muted">(edited)</small>';
+        }
+    });
+
+    connection.on("MessageDeleted", (data) => {
+        const msgEl = document.getElementById(`msg-${data.messageId}`);
+        if (msgEl) {
+            msgEl.remove();
+        }
+    });
+
+    connection.on("MessagesRead", (data) => {
+        console.log(`Messages read by trader ${data.by}`);
+    });
+
+    // Send message
+    async function sendMessage() {
+        const content = messageInput.value.trim();
+        if (!content) return;
+
+        try {
+            const response = await fetch('/api/chat/send', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    receiverTraderId: receiverTraderId,
+                    content: content
+                })
+            });
+
+            if (response.ok) {
+                messageInput.value = '';
+                const msg = await response.json();
+                addMessageToUI(msg, true);
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }
+        } catch (error) {
+            console.error('Error sending message:', error);
+            alert('Failed to send message');
+        }
+    }
+
+    // Load recipient info
+    async function loadRecipientInfo() {
+        try {
+            const response = await fetch(`/api/chat/traders?search=&limit=1`);
+            const traders = await response.json();
+            const recipient = traders.find(t => t.traderId === receiverTraderId);
+            if (recipient) {
+                recipientNameEl.textContent = recipient.name;
+            }
+        } catch (error) {
+            console.error('Error loading recipient info:', error);
+        }
+    }
+
+    sendButton.addEventListener("click", sendMessage);
+    messageInput.addEventListener("keypress", e => {
+        if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
+        }
+    });
+
+    // Start SignalR connection
+    connection.start()
+        .then(() => {
+            console.log("SignalR connected");
+            return connection.invoke("JoinTraderGroup", senderTraderId);
+        })
+        .then(() => {
+            loadConversation();
+            loadRecipientInfo();
+        })
+        .catch(err => {
+            console.error("Connection error:", err);
+            setTimeout(() => connection.start(), 5000);
+        });
+
+    connection.onclose(() => {
+        console.log("Connection closed");
+        setTimeout(() => connection.start(), 5000);
+    });
+
+    // Cleanup on page leave
+    window.addEventListener('beforeunload', () => {
+        connection.invoke("LeaveTraderGroup", senderTraderId).catch(err => console.error(err));
+    });
+</script>
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

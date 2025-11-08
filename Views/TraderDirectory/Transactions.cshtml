@@ -11,15 +11,21 @@
             <div class="page-subtitle">Review recent orders and sort by date or total amount</div>
         </div>
         <div class="back-actions">
-            <a asp-action="Details" asp-route-id="@trader.TraderId" class="btn btn-outline-secondary">
-                <i class="fas fa-arrow-left"></i> Back to Profile
-            </a>
+            @if (trader != null)
+            {
+                <a asp-action="Details" asp-route-id="@trader.TraderId" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Profile
+                </a>
+            }
         </div>
     </div>
 
     <!-- 🔽 Sort/Filter Bar -->
     <form method="get" class="filters-bar mb-3">
-        <input type="hidden" name="id" value="@trader.TraderId" />
+        @if (trader != null)
+        {
+            <input type="hidden" name="id" value="@trader.TraderId" />
+        }
         <div class="d-flex gap-2 align-items-center">
             <label class="me-2 mb-0 text-muted">Sort:</label>
             <select name="sortOrder" class="form-select w-auto" onchange="this.form.submit()">

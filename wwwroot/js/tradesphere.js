@@ -117,6 +117,46 @@ document.addEventListener('DOMContentLoaded', function() {
     `;
     document.head.appendChild(rippleStyle);
     
+    // Add chat styling
+    const chatStyle = document.createElement('style');
+    chatStyle.textContent = `
+        .status-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+        .status-online {
+            background-color: #28a745;
+        }
+        .status-offline {
+            background-color: #aaa;
+        }
+        .typing-indicator {
+            font-style: italic;
+            color: #6c757d;
+            margin: 0 0 10px 0;
+            font-size: 0.85rem;
+        }
+        .conversation-row.unread {
+            font-weight: bold;
+        }
+        .unread-count-badge {
+            background-color: #dc3545;
+            color: white;
+            font-size: 0.75rem;
+            padding: 2px 6px;
+            border-radius: 10px;
+            margin-left: 8px;
+        }
+        .last-message-time {
+            font-size: 0.75rem;
+            color: #6c757d;
+        }
+    `;
+    document.head.appendChild(chatStyle);
+    
     // Apply ripple effect to buttons
     buttons.forEach(button => {
         button.addEventListener('click', createRipple);
@@ -192,6 +232,211 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('%c🚀 Welcome to TradeSphere!', 'color: #2563eb; font-size: 16px; font-weight: bold;');
     console.log('%cBuilt with modern web technologies for the best trading experience.', 'color: #64748b; font-size: 12px;');
 });
+
+// Chat functionality with unread count
+if (typeof signalR !== 'undefined') {
+    const connection = new signalR.HubConnectionBuilder()
+        .withUrl('/chatHub')
+        .build();
+    
+    // Make connection available globally
+    window.connection = connection;
+
+    // Set up SignalR connection
+    connection.start().catch(err => console.error(err.toString()));
+
+    // Listen for new messages
+    connection.on("ReceiveMessage", (message) => {
+        const currentTraderId = getCurrentTraderId();
+        if (message.SenderTraderId && message.SenderTraderId !== currentTraderId) {
+            moveConversationToTop(message.SenderTraderId);
+            incrementUnreadCount(message.SenderTraderId);
+        }
+        loadUnreadBadge();
+    });
+    
+    connection.on("UpdateChatBoard", refreshChatBoard);
+    connection.on("UserStatusChanged", refreshChatBoard);
+    
+    connection.on("UserTyping", (senderTraderId) => {
+        const typingElement = document.getElementById("typingIndicator");
+        if (typingElement) {
+            typingElement.innerText = "Typing...";
+            clearTimeout(window.typingTimeout);
+            window.typingTimeout = setTimeout(() => {
+                typingElement.innerText = "";
+            }, 3000);
+        }
+    });
+    
+    // Load unread count on page load
+    loadUnreadBadge();
+    
+    // Mark messages as read when chat opens
+    document.addEventListener('click', async event => {
+        const element = event.target.closest('.chat-contact, .conversation-row');
+        if (element) {
+            const traderId = element.getAttribute('data-trader-id');
+            if (traderId) {
+                await markMessagesAsRead(traderId);
+                loadUnreadBadge();
+            }
+        }
+    });
+    
+    // Typing indicator trigger
+    const messageInput = document.getElementById('messageInput');
+    if (messageInput) {
+        let typingTimer;
+        messageInput.addEventListener('input', () => {
+            const targetTraderId = messageInput.getAttribute('data-target-trader-id');
+            if (targetTraderId && window.connection) {
+                clearTimeout(typingTimer);
+                typingTimer = setTimeout(() => {
+                    window.connection.invoke("Typing", parseInt(targetTraderId));
+                }, 300);
+            }
+        });
+    }
+                    }
+                }, 300);
+            }
+        });
+    }
+}
+
+// Function to load and display the unread count badge
+async function loadUnreadBadge() {
+    try {
+        const response = await fetch('/api/chat/unread-count');
+        const count = await response.json();
+        const badge = document.getElementById("unreadBadge");
+        
+        if (badge) {
+            if (count > 0) {
+                badge.innerText = count;
+                badge.style.display = 'inline-block';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+        
+        // Update conversation list styling
+        updateConversationList();
+    } catch (error) {
+        console.error('Error fetching unread count:', error);
+    }
+}
+
+// Function to mark messages as read when a user opens a conversation
+async function markMessagesAsRead(traderId) {
+    try {
+        await fetch(`/api/chat/mark-read/${traderId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+    } catch (error) {
+        console.error('Error marking messages as read:', error);
+    }
+}
+
+// Function to move conversation to top of the list
+function moveConversationToTop(senderTraderId) {
+    const conversationContainer = document.querySelector('.chat-contacts-list, .conversation-list');
+    if (!conversationContainer) return;
+    
+    const senderElement = conversationContainer.querySelector(`[data-trader-id="${senderTraderId}"]`);
+    if (senderElement && senderElement.parentNode === conversationContainer) {
+        // Move to top
+        conversationContainer.insertBefore(senderElement, conversationContainer.firstChild);
+        // Update timestamp to "just now"
+        const timeElement = senderElement.querySelector('.last-message-time');
+        if (timeElement) {
+            timeElement.textContent = 'just now';
+        }
+    }
+}
+
+// Function to increment unread count for a conversation
+function incrementUnreadCount(senderTraderId) {
+    const senderElement = document.querySelector(`[data-trader-id="${senderTraderId}"]`);
+    if (!senderElement) return;
+    
+    const currentCount = parseInt(senderElement.getAttribute('data-unread-count')) || 0;
+    senderElement.setAttribute('data-unread-count', currentCount + 1);
+    
+    // Update DOM display
+    updateConversationBadge(senderElement, currentCount + 1);
+    // Make it bold
+    senderElement.classList.add("font-weight-bold");
+}
+
+// Helper to update badge UI
+function updateConversationBadge(element, count) {
+    let badge = element.querySelector('.unread-count-badge');
+    if (!badge) {
+        badge = document.createElement('span');
+        badge.className = 'badge badge-danger ml-2 unread-count-badge';
+        const nameElement = element.querySelector('.contact-name, .conversation-name');
+        if (nameElement) {
+            nameElement.appendChild(badge);
+        }
+    }
+    badge.innerText = count > 99 ? '99+' : count.toString();
+}
+
+// Get current trader ID from page or localStorage
+function getCurrentTraderId() {
+    // Try to get current trader ID from several possible sources
+    return document.querySelector('meta[name="trader-id"]')?.content ||
+           localStorage.getItem('traderId') ||
+           document.querySelector('#currentTraderId')?.value ||
+           '';
+}
+
+// Refresh Chat Board function
+async function refreshChatBoard() {
+    try {
+        const response = await fetch('/api/chat/chat-board-partial');
+        const html = await response.text();
+        const container = document.getElementById("chatBoardContainer");
+        if (container) {
+            container.innerHTML = html;
+        }
+    } catch (error) {
+        console.error('Error refreshing chat board:', error);
+    }
+}
+
+// Function to update conversation list with bold formatting for unread messages
+function updateConversationList() {
+    // Get all conversation rows
+    document.querySelectorAll('.chat-contact, .conversation-row').forEach(row => {
+        const unreadCount = parseInt(row.getAttribute('data-unread-count')) || 0;
+        if (unreadCount > 0) {
+            row.classList.add("font-weight-bold");
+            // Show unread count badge next to the conversation
+            let badge = row.querySelector('.unread-count-badge');
+            if (!badge) {
+                badge = document.createElement('span');
+                badge.className = 'badge badge-danger ml-2 unread-count-badge';
+                const nameElement = row.querySelector('.contact-name, .conversation-name');
+                if (nameElement) {
+                    nameElement.appendChild(badge);
+                }
+            }
+            badge.innerText = unreadCount > 99 ? '99+' : unreadCount.toString();
+        } else {
+            row.classList.remove("font-weight-bold");
+            const badge = row.querySelector('.unread-count-badge');
+            if (badge) {
+                badge.remove();
+            }
+        }
+    });
+}
 
 // Utility functions
 window.TradeSphere = {

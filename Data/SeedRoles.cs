@@ -5,6 +5,8 @@ namespace TradeSphere3.Data
 {
     public static class SeedRoles
     {
+
+        //assign our custom role to IdentityRole In Our RoleManager
         public static async Task Initialize(RoleManager<IdentityRole> roleManager)
         {
             var roles = new[] { "User", "Trader" };

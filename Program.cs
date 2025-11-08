@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Threading.Tasks;
 using TradeSphere3.Data;
@@ -26,9 +27,9 @@ namespace TradeSphere3
                 {
                     logger.LogInformation("Starting TradeSphere3 application initialization...");
 
-                    // Ensure database is created
+                    // Apply pending migrations on startup
                     var context = services.GetRequiredService<ApplicationDbContext>();
-                    await context.Database.EnsureCreatedAsync();
+                    context.Database.Migrate();
 
                     // Seed roles (Admin, Trader, etc.)
                     var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();

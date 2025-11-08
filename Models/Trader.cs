@@ -1,6 +1,8 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNetCore.Mvc;
+
 
 namespace TradeSphere3.Models
 {
@@ -38,7 +40,8 @@ namespace TradeSphere3.Models
 
 		[Required]
 		[EmailAddress]
-		public string Email { get; set; }  // Contact Email
+        [Remote(action: "IsEmailAvailable", controller: "Trader")]
+        public string Email { get; set; }  // Contact Email
 
 		[Required]
 		[Phone]
@@ -48,11 +51,11 @@ namespace TradeSphere3.Models
 		[StringLength(20)]
 		public string TradeRole { get; set; }  // Importer / Exporter / Both
 
-	[DataType(DataType.Date)]
-	public DateTime RegistrationDate { get; set; }  // Registration Date
+		[DataType(DataType.Date)]
+		public DateTime RegistrationDate { get; set; }  // Registration Date
 
-	[DataType(DataType.Date)]
-	public DateTime? UpdatedAt { get; set; }  // Last Update Date
+		[DataType(DataType.Date)]
+		public DateTime? UpdatedAt { get; set; }  // Last Update Date
 
 		[Column(TypeName = "decimal(18,2)")]
 		public decimal Turnover { get; set; }  // Yearly Trade Turnover

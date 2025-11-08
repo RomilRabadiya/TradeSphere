@@ -24,6 +24,7 @@ namespace TradeSphere3.Controllers
             _context = context;
         }
 
+        //Is check User role and Check Trader is Complete their Profile or not
         public async Task<IActionResult> Index()
         {
             if (!User.Identity.IsAuthenticated)
@@ -35,18 +36,19 @@ namespace TradeSphere3.Controllers
             {
                 ViewBag.UserName = user.FullName ?? user.UserName;
 
-                // ✅ Get roles directly from Identity
+                // Get roles directly from Identity
                 var roles = await _userManager.GetRolesAsync(user);
                 var role = roles.FirstOrDefault() ?? "User"; // Default fallback
 
                 ViewBag.Role = role;
                 ViewBag.IsTrader = role == "Trader";
 
-                // Load Trader navigation (if not lazy-loaded)
-                var userWithTrader = await _context.Users
-                    .Include(u => u.Trader)
+
+                var userWithTrader = await _context.Users     //Get All User
+                    .Include(u => u.Trader)     /// check User is Link with Trader or Not is Trader? Trader Attribute of user
                     .FirstOrDefaultAsync(u => u.Id == user.Id);
 
+                //If User is Link with Trader Then Assign That Trader Otherwise Null
                 ViewBag.HasTraderProfile = userWithTrader.Trader != null;
             }
             else

@@ -24,9 +24,9 @@ namespace TradeSphere3.Data
             // ApplicationUser configuration
             builder.Entity<ApplicationUser>(entity =>
             {
-                entity.Property(e => e.FullName).HasMaxLength(256);
                 // Commented out unique email constraint as it may conflict with Identity
-                // entity.HasIndex(e => e.Email).IsUnique();
+                entity.HasIndex(e => e.Email).IsUnique();
+                entity.Property(e => e.FullName).HasMaxLength(256);
             });
 
             // Disable cascade delete globally to avoid conflicts
@@ -36,5 +36,5 @@ namespace TradeSphere3.Data
                 foreignKey.DeleteBehavior = DeleteBehavior.NoAction;
             }
         }
-    }
+}
 }

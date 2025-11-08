@@ -98,5 +98,6 @@ namespace TradeSphere3.Controllers
             return View(await transactions.ToListAsync());
         }
 
+
     }
 }
